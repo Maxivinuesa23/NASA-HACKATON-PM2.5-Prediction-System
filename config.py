@@ -1,6 +1,7 @@
 # Configuración de API Keys
-# Reemplaza "TU_API_KEY_AQUI" con tu API key real de OpenAQ
+# API de AirVisual (IQAir)
 
-# API Key de OpenAQ
-# Obtén tu API key gratis en: https://openaq.org/
-OPENAQ_API_KEY = "dc63ee0fd3e68286d3c13e6d3ed81d85c35f1111115d1830722cf26eef0a468a"
+# API Key de AirVisual
+# Obtén tu API key en: https://www.iqair.com/air-quality-monitors/api
+AIRVISUAL_API_KEY = "183ab150-8440-4da1-a352-7758010a4d76"
+AIRVISUAL_BASE_URL = "http://api.airvisual.com/v2/"
