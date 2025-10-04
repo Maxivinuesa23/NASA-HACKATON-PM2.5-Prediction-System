@@ -53,7 +53,16 @@ CITIES = {
         "city": "Mendoza",              # Nombre exacto para la API
         "state": "Mendoza",             # Provincia de Mendoza
         "country": "Argentina"          # Argentina
+    },
+    "7":{
+        "name": "Aksu",              # Nombre amigable (única ciudad china disponible)
+        "city": "Aksu",              # Nombre exacto para la API
+        "state": "Xinjiang",         # Región de Xinjiang
+        "country": "China"           # China
     }
+
+    #Aksu
+
 }
 
 # ========================================
