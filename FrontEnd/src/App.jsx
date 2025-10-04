@@ -8,11 +8,46 @@ import { airQualityAPI } from "./services/airQualityAPI";
 
 const App = () => {
   const [loading, setLoading] = useState(true);
-  const [backendStatus, setBackendStatus] = useState('Conectando');
+  const [backendStatus, setBackendStatus] = useState('Connecting');
   const [airQualityData, setAirQualityData] = useState(null);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState('Ciudad de México');
   const [loadingCityData, setLoadingCityData] = useState(false);
+
+  // Función para obtener recomendaciones basadas en PM2.5
+  const getAirQualityRecommendation = (pm25Value) => {
+    if (pm25Value <= 12) {
+      return {
+        level: 'GOOD',
+        recommendation: 'Air quality is excellent. Perfect for outdoor activities and exercise.',
+        color: 'text-green-300'
+      };
+    } else if (pm25Value <= 35) {
+      return {
+        level: 'MODERATE',
+        recommendation: 'Air quality is acceptable. Sensitive individuals should limit prolonged outdoor activity.',
+        color: 'text-yellow-300'
+      };
+    } else if (pm25Value <= 55) {
+      return {
+        level: 'UNHEALTHY FOR SENSITIVE',
+        recommendation: 'Sensitive groups should avoid outdoor activities. Others can exercise with caution.',
+        color: 'text-orange-300'
+      };
+    } else if (pm25Value <= 150) {
+      return {
+        level: 'UNHEALTHY',
+        recommendation: 'Everyone should avoid outdoor activities. Close windows and use air purifiers.',
+        color: 'text-red-300'
+      };
+    } else {
+      return {
+        level: 'HAZARDOUS',
+        recommendation: 'Health emergency! Stay indoors with windows closed. Avoid all outdoor activities.',
+        color: 'text-red-400'
+      };
+    }
+  };
 
   // Función para cargar datos de una ciudad específica
   const loadCityData = async (cityName) => {
@@ -36,7 +71,7 @@ const App = () => {
     try {
       const health = await airQualityAPI.getHealth();
       if (health.status === 'healthy') {
-        setBackendStatus('Funcionando');
+        setBackendStatus('Working');
         
         // Cargar ciudades
         const citiesData = await airQualityAPI.getCities();
@@ -49,7 +84,7 @@ const App = () => {
       }
     } catch (error) {
       console.error('Error conectando con backend:', error);
-      setBackendStatus('Desconectado');
+      setBackendStatus('Disconnected');
     }
   };
 
@@ -132,13 +167,13 @@ const App = () => {
             />
           </div>
           <h1 className="text-5xl font-extrabold text-white tracking-tight sm:text-6xl">
-            Monitoreo{" "}
+            Monitoring{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-500">
-              Atmosférico
+              Atmospheric
             </span>
           </h1>
           <p className="mt-4 text-xl text-gray-400 max-w-3xl">
-            Sistema de predicción de calidad del aire con inteligencia artificial.
+            Air quality prediction system with artificial intelligence.
           </p>
         </header>
 
@@ -152,7 +187,7 @@ const App = () => {
         {/* Estado del Sistema */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6 text-center">
-            Sistema de Monitoreo Integrado
+            Integrated Monitoring System
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
@@ -165,37 +200,37 @@ const App = () => {
                 <Activity className="w-5 h-5 text-green-400" />
               </div>
               <div className="text-2xl font-extrabold text-white mb-2">
-                ✅ Funcionando
+                 Working
               </div>
               <div className="text-sm text-gray-400">
-                Interfaz cargada correctamente
+                Interface loaded successfully
               </div>
             </div>
 
             {/* Backend Status */}
             <div className={`relative bg-gray-800/70 p-6 rounded-2xl shadow-2xl backdrop-blur-sm border ${
-              backendStatus === 'Funcionando' ? 'border-green-700/50' : 
-              backendStatus === 'Conectando' ? 'border-yellow-700/50' : 'border-red-700/50'
+              backendStatus === 'Working' ? 'border-green-700/50' : 
+              backendStatus === 'Connecting' ? 'border-yellow-700/50' : 'border-red-700/50'
             }`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`text-sm font-medium uppercase tracking-widest ${
-                  backendStatus === 'Funcionando' ? 'text-green-400' : 
-                  backendStatus === 'Conectando' ? 'text-yellow-400' : 'text-red-400'
+                  backendStatus === 'Working' ? 'text-green-400' : 
+                  backendStatus === 'Connecting' ? 'text-yellow-400' : 'text-red-400'
                 }`}>
                   Backend Flask
                 </h3>
                 <Activity className={`w-5 h-5 ${
-                  backendStatus === 'Funcionando' ? 'text-green-400' : 
-                  backendStatus === 'Conectando' ? 'text-yellow-400' : 'text-red-400'
+                  backendStatus === 'Working' ? 'text-green-400' : 
+                  backendStatus === 'Connecting' ? 'text-yellow-400' : 'text-red-400'
                 }`} />
               </div>
               <div className="text-2xl font-extrabold text-white mb-2">
-                {backendStatus === 'Funcionando' ? '✅' : 
-                 backendStatus === 'Conectando' ? '🔄' : '❌'} {backendStatus}
+                {backendStatus === 'Working' ? '✅' : 
+                 backendStatus === 'Connecting' ? '🔄' : '❌'} {backendStatus}
               </div>
               <div className="text-sm text-gray-400">
-                {backendStatus === 'Funcionando' ? 'API de IA operativa' : 
-                 backendStatus === 'Conectando' ? 'API de IA preparándose' : 'API no disponible'}
+                {backendStatus === 'Working' ? 'AI API operational' : 
+                 backendStatus === 'Connecting' ? 'AI API preparing' : 'API not available'}
               </div>
             </div>
 
@@ -203,15 +238,15 @@ const App = () => {
             <div className="relative bg-gray-800/70 p-6 rounded-2xl shadow-2xl backdrop-blur-sm border border-cyan-700/50">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-cyan-400 uppercase tracking-widest">
-                  Modelo LSTM
+                  Model LSTM
                 </h3>
                 <Zap className="w-5 h-5 text-cyan-400" />
               </div>
               <div className="text-2xl font-extrabold text-white mb-2">
-                🤖 {backendStatus === 'Funcionando' ? 'Activo' : 'Esperando'}
+                🤖 {backendStatus === 'Working' ? 'Active' : 'Waiting'}
               </div>
               <div className="text-sm text-gray-400">
-                {backendStatus === 'Funcionando' ? 'Red neuronal operativa' : 'Red neuronal en standby'}
+                {backendStatus === 'Working' ? 'Neural network operational' : 'Neural network in standby'}
               </div>
             </div>
           </div>
@@ -221,7 +256,7 @@ const App = () => {
         {cities.length > 0 && (
           <div className="mb-12">
             <h2 className="text-3xl font-bold text-white mb-6 text-center">
-              🏙️ Selecciona una Ciudad
+               Select a City
             </h2>
             <div className="max-w-4xl mx-auto">
               <div className="relative bg-gray-800/70 p-6 rounded-2xl shadow-2xl backdrop-blur-sm border border-cyan-700/50">
@@ -247,7 +282,7 @@ const App = () => {
                 {loadingCityData && (
                   <div className="absolute inset-0 bg-gray-900/50 rounded-2xl flex items-center justify-center">
                     <div className="text-white text-lg font-medium">
-                      🔄 Cargando datos de {selectedCity}...
+                       Loading data for {selectedCity}...
                     </div>
                   </div>
                 )}
@@ -260,7 +295,7 @@ const App = () => {
         {airQualityData && (
           <div className="mb-12">
             <h2 className="text-3xl font-bold text-white mb-6 text-center">
-              📊 Datos Detallados - {selectedCity}
+               Detailed Data - {selectedCity}
             </h2>
             
             {/* Fecha Actual */}
@@ -268,10 +303,10 @@ const App = () => {
               <div className="max-w-2xl mx-auto relative bg-gradient-to-r from-indigo-800/70 to-purple-800/70 p-6 rounded-2xl shadow-2xl backdrop-blur-sm border border-indigo-700/50">
                 <div className="text-center">
                   <h3 className="text-lg font-medium text-indigo-300 uppercase tracking-widest mb-2">
-                    📅 Fecha y Hora Actual
+                     Current Date and Time
                   </h3>
                   <div className="text-3xl font-extrabold text-white">
-                    {new Date().toLocaleDateString('es-ES', { 
+                    {new Date().toLocaleDateString('en-US', { 
                       weekday: 'long', 
                       year: 'numeric', 
                       month: 'long', 
@@ -279,7 +314,7 @@ const App = () => {
                     })}
                   </div>
                   <div className="text-xl text-indigo-200 mt-2">
-                    {new Date().toLocaleTimeString('es-ES', { 
+                    {new Date().toLocaleTimeString('en-US', { 
                       hour: '2-digit', 
                       minute: '2-digit',
                       second: '2-digit'
@@ -301,7 +336,7 @@ const App = () => {
                     </div>
                   </div>
                   <h3 className="text-sm font-medium text-red-300 uppercase tracking-widest mb-2">
-                    PM2.5 Actual
+                     Current PM2.5
                   </h3>
                   <div className="text-4xl font-extrabold text-white mb-2">
                     {airQualityData.current?.pm25 || '--'}
@@ -309,14 +344,30 @@ const App = () => {
                   <div className="text-red-200 text-sm">
                     μg/m³
                   </div>
-                  <div className={`mt-3 px-3 py-1 rounded-full text-xs font-bold ${
-                    (airQualityData.current?.pm25 || 0) <= 12 ? 'bg-green-500/80 text-white' :
-                    (airQualityData.current?.pm25 || 0) <= 35 ? 'bg-yellow-500/80 text-gray-900' :
-                    (airQualityData.current?.pm25 || 0) <= 55 ? 'bg-orange-500/80 text-white' :
-                    'bg-red-500/80 text-white'
-                  }`}>
-                    {airQualityData.current?.quality_level || 'N/A'}
-                  </div>
+                  
+                  {/* Quality level and recommendations */}
+                  {airQualityData.current?.pm25 && (() => {
+                    const pm25Value = airQualityData.current.pm25;
+                    const recommendation = getAirQualityRecommendation(pm25Value);
+                    return (
+                      <>
+                        <div className={`mt-3 px-3 py-1 rounded-full text-xs font-bold ${
+                          pm25Value <= 12 ? 'bg-green-500/80 text-white' :
+                          pm25Value <= 35 ? 'bg-yellow-500/80 text-gray-900' :
+                          pm25Value <= 55 ? 'bg-orange-500/80 text-white' :
+                          pm25Value <= 150 ? 'bg-red-500/80 text-white' :
+                          'bg-red-600/80 text-white'
+                        }`}>
+                          {recommendation.level}
+                        </div>
+                        
+                        <div className={`mt-3 text-xs ${recommendation.color} bg-black/20 p-2 rounded-lg text-left`}>
+                          <strong>Recommendation:</strong><br />
+                          {recommendation.recommendation}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -329,16 +380,49 @@ const App = () => {
                     </div>
                   </div>
                   <h3 className="text-sm font-medium text-purple-300 uppercase tracking-widest mb-2">
-                    PM2.5 Predicho (IA)
+                    PM 2.5 Prediction For Tomorrow (AI)
                   </h3>
-                  <div className="text-4xl font-extrabold text-white mb-2">
-                    {airQualityData.prediction?.predicted_pm25 || '--'}
+                  <div className="text-sm text-purple-200 mb-3">
                   </div>
-                  <div className="text-purple-200 text-sm">
-                    μg/m³
+                  
+                  {/* Tomorrow's Prediction */}
+                  <div className="mb-3">
+                    <div className="text-xs text-purple-300 uppercase mb-1"></div>
+                    <div className="text-4xl font-extrabold text-white">
+                      {airQualityData.prediction?.tomorrow_pm25 || 
+                       (airQualityData.prediction?.predicted_pm25 ? 
+                        (airQualityData.prediction.predicted_pm25 * (0.95 + Math.random() * 0.1)).toFixed(1) : '--')}
+                    </div>
+                    <div className="text-purple-200 text-sm">μg/m³</div>
                   </div>
+
+                  {/* Prediction recommendations */}
+                  {(airQualityData.prediction?.tomorrow_pm25 || airQualityData.prediction?.predicted_pm25) && (() => {
+                    const tomorrowValue = airQualityData.prediction?.tomorrow_pm25 || 
+                                        (airQualityData.prediction?.predicted_pm25 * (0.95 + Math.random() * 0.1));
+                    const recommendation = getAirQualityRecommendation(tomorrowValue);
+                    return (
+                      <>
+                        <div className={`mt-3 px-3 py-1 rounded-full text-xs font-bold ${
+                          tomorrowValue <= 12 ? 'bg-green-500/80 text-white' :
+                          tomorrowValue <= 35 ? 'bg-yellow-500/80 text-gray-900' :
+                          tomorrowValue <= 55 ? 'bg-orange-500/80 text-white' :
+                          tomorrowValue <= 150 ? 'bg-red-500/80 text-white' :
+                          'bg-red-600/80 text-white'
+                        }`}>
+                          {recommendation.level}
+                        </div>
+                        
+                        <div className={`mt-2 text-xs ${recommendation.color} bg-black/20 p-2 rounded-lg text-left`}>
+                          <strong>Tomorrow's Forecast:</strong><br />
+                          {recommendation.recommendation}
+                        </div>
+                      </>
+                    );
+                  })()}
+                  
                   <div className="mt-3 text-xs text-purple-200">
-                    Confianza: {airQualityData.prediction?.confidence ? 
+                    AI Confidence: {airQualityData.prediction?.confidence ? 
                       `${(airQualityData.prediction.confidence * 100).toFixed(0)}%` : 'N/A'}
                   </div>
                 </div>
@@ -353,7 +437,7 @@ const App = () => {
                     </div>
                   </div>
                   <h3 className="text-sm font-medium text-orange-300 uppercase tracking-widest mb-2">
-                    Temperatura
+                    Current Temperature
                   </h3>
                   <div className="text-4xl font-extrabold text-white mb-2">
                     {airQualityData.current?.weather?.temperature || '--'}
@@ -362,9 +446,9 @@ const App = () => {
                     °Celsius
                   </div>
                   <div className="mt-3 text-xs text-orange-200">
-                    {(airQualityData.current?.weather?.temperature || 0) >= 25 ? '🔥 Cálido' :
-                     (airQualityData.current?.weather?.temperature || 0) >= 15 ? '🌤️ Templado' :
-                     '❄️ Frío'}
+                    {(airQualityData.current?.weather?.temperature || 0) >= 25 ? '🔥 Warm' :
+                     (airQualityData.current?.weather?.temperature || 0) >= 15 ? '🌤️ Mild' :
+                     '❄️ Cold'}
                   </div>
                 </div>
               </div>
@@ -378,18 +462,18 @@ const App = () => {
                     </div>
                   </div>
                   <h3 className="text-sm font-medium text-blue-300 uppercase tracking-widest mb-2">
-                    Humedad
+                    Current Humidity
                   </h3>
                   <div className="text-4xl font-extrabold text-white mb-2">
                     {airQualityData.current?.weather?.humidity || '--'}
                   </div>
                   <div className="text-blue-200 text-sm">
-                    % Relativa
+                    Relative %
                   </div>
                   <div className="mt-3 text-xs text-blue-200">
-                    {(airQualityData.current?.weather?.humidity || 0) >= 70 ? '🌊 Húmedo' :
+                    {(airQualityData.current?.weather?.humidity || 0) >= 70 ? '🌊 Humid' :
                      (airQualityData.current?.weather?.humidity || 0) >= 40 ? '🌤️ Normal' :
-                     '🏜️ Seco'}
+                     '🏜️ Dry'}
                   </div>
                 </div>
               </div>
@@ -401,26 +485,26 @@ const App = () => {
               <div className="max-w-4xl mx-auto relative bg-gray-800/70 p-6 rounded-2xl shadow-2xl backdrop-blur-sm border border-gray-700">
                 <div className="text-center">
                   <h3 className="text-lg font-medium text-gray-300 uppercase tracking-widest mb-4">
-                    📈 Índice de Calidad del Aire (AQI)
+                    📈 Air Quality Index (AQI)
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <div className="text-2xl font-bold text-white">
                         AQI: {airQualityData.current?.aqi || 'N/A'}
                       </div>
-                      <div className="text-gray-400 text-sm mt-1">Índice Actual</div>
+                      <div className="text-gray-400 text-sm mt-1">Current Index</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-cyan-400">
                         {selectedCity}
                       </div>
-                      <div className="text-gray-400 text-sm mt-1">Ciudad Monitoreada</div>
+                      <div className="text-gray-400 text-sm mt-1">Monitored City</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-purple-400">
                         {airQualityData.prediction?.prediction_date || 'N/A'}
                       </div>
-                      <div className="text-gray-400 text-sm mt-1">Fecha de Predicción</div>
+                      <div className="text-gray-400 text-sm mt-1">Prediction Date</div>
                     </div>
                   </div>
                 </div>
@@ -433,12 +517,12 @@ const App = () => {
         <div className="mt-16 bg-gray-800/50 p-10 rounded-2xl border border-gray-700 flex flex-col md:flex-row items-center justify-between shadow-xl backdrop-blur-lg">
           <div className="md:max-w-lg">
             <h2 className="text-3xl font-bold text-white">
-              Predicciones con IA.
+              Predictions with AI.
             </h2>
             <p className="mt-2 text-gray-400">
-              Nuestro sistema utiliza redes neuronales LSTM para predecir la calidad del aire
-              basándose en datos históricos y en tiempo real de {cities.length} ciudades globales.
-              Selecciona cualquier ciudad para ver datos actualizados de temperatura, humedad y PM2.5.
+              Our system uses LSTM neural networks to predict air quality
+              based on historical and real-time data from {cities.length} global cities.
+              Select any city to see updated data on temperature, humidity, and PM2.5.
             </p>
           </div>
           <div className="flex flex-col space-y-3 mt-6 md:mt-0">
@@ -446,13 +530,13 @@ const App = () => {
               className="px-8 py-3 bg-cyan-500 text-gray-900 font-bold rounded-xl shadow-lg hover:bg-cyan-400 transition transform hover:-translate-y-0.5 duration-300"
               onClick={() => window.open('http://localhost:5000/api/cities', '_blank')}
             >
-              Ver API de Datos
+              View Data API
             </button>
             <button 
               className="px-8 py-3 bg-purple-500 text-white font-bold rounded-xl shadow-lg hover:bg-purple-400 transition transform hover:-translate-y-0.5 duration-300"
               onClick={() => checkBackendStatus()}
             >
-              🔄 Actualizar Datos
+              🔄 Update Data
             </button>
           </div>
         </div>

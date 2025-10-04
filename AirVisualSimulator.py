@@ -100,17 +100,17 @@ def get_aqi_quality_level(aqi):
     SALIDA: Texto descriptivo + emoji para mostrar al usuario
     """
     if aqi <= 50:                      # AQI 0-50: Lo mejor posible
-        return "BUENA", "🟢"           # Verde = todo bien
+        return "Good", "🟢"           # Verde = todo bien
     elif aqi <= 100:                   # AQI 51-100: Aceptable para la mayoría
-        return "MODERADA", "🟡"        # Amarillo = precaución
+        return "Moderate  Recommendation: Take it easy", "🟡"        # Amarillo = precaución
     elif aqi <= 150:                   # AQI 101-150: Problemas para sensibles
-        return "NO SALUDABLE (GRUPOS SENSIBLES)", "🟠"  # Naranja = cuidado
+        return "Unhealthy (Sensitive Groups)  Recommendation: Be cautious", "🟠"  # Naranja = cuidado
     elif aqi <= 200:                   # AQI 151-200: Malo para todos
-        return "NO SALUDABLE", "🔴"    # Rojo = peligro
+        return "Unhealthy Recommendation: Take action", "🔴"    # Rojo = peligro
     elif aqi <= 300:                   # AQI 201-300: Muy malo
-        return "MUY NO SALUDABLE", "🟣"  # Morado = emergencia
+        return "Very Unhealthy Recommendation: Avoid", "🟣"  # Morado = emergencia
     else:                              # AQI 301+: Extremo
-        return "PELIGROSA", "🔴"       # Rojo intenso = evacuación
+        return "Hazardous Recommendation: Evacuate", "🔴"       # Rojo intenso = evacuación
 
 def get_api_key():
     """

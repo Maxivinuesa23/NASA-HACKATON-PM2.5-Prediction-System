@@ -44,7 +44,7 @@ const MetricCard = ({ title, value, unit, icon: Icon, change }) => {
             }`}
           />
           {change.toFixed(1)}%
-          <span className="ml-2 font-normal text-gray-400">vs. mes pasado</span>
+          <span className="ml-2 font-normal text-gray-400">vs. last month</span>
         </div>
       </div>
     </div>
