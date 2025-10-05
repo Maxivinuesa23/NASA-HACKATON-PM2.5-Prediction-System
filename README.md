@@ -18,3 +18,11 @@ https://drive.google.com/drive/u/6/folders/11EYaicG03FoEvJsSaK6BuLZEMXzNl5t-
 
 # Trial Video
 https://www.youtube.com/watch?v=PdaggfgVCJo
+
+## Contact
+
+Máximo Vinuesa - [@Linkedin](https://www.linkedin.com/in/maximo-vinuesa/)
+Tomas Picco - [@Linkedin](https://www.linkedin.com/in/tomaspicco/)
+Santiago Ledesma - [@Linkedin](https://www.linkedin.com/in/santiago-ledesma-4b1221325?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app)
+
+![Versión](https://img.shields.io/badge/version-1.5.2-blue.svg)
