@@ -33,19 +33,6 @@ const MetricCard = ({ title, value, unit, icon: Icon, change }) => {
           {formatNumber(value)}
           {unit}
         </div>
-        <div
-          className={`mt-2 flex items-center text-sm font-semibold ${
-            isPositive ? "text-green-400" : "text-red-400"
-          }`}
-        >
-          <ArrowUpRight
-            className={`w-4 h-4 mr-1 transform ${
-              isPositive ? "rotate-0" : "rotate-180 text-red-400"
-            }`}
-          />
-          {change.toFixed(1)}%
-          <span className="ml-2 font-normal text-gray-400">vs. last month</span>
-        </div>
       </div>
     </div>
   );

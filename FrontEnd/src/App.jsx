@@ -101,31 +101,30 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Datos de ejemplo para las tarjetas de métricas (ahora con datos reales si están disponibles)
   const metrics = [
     {
-      title: "Calidad del Aire",
+      title: "Air Quality Now",
       value: airQualityData?.current?.pm25 || 42,
       unit: " PM2.5",
       icon: Activity,
       change: -5.2,
     },
     {
-      title: "Predicción IA",
+      title: "AI Prediction",
       value: airQualityData?.prediction?.predicted_pm25 || 38,
       unit: " PM2.5",
       icon: Zap,
       change: 2.1,
     },
     {
-      title: "Ciudades Monitoreadas",
+      title: "Monitored Cities",
       value: cities.length || 7,
       unit: "",
       icon: Users,
       change: 0,
     },
     {
-      title: "Temperatura",
+      title: "Temperature",
       value: airQualityData?.current?.weather?.temperature || 22,
       unit: "°C",
       icon: TrendingUp,
@@ -453,7 +452,7 @@ const App = () => {
                 </div>
               </div>
 
-              {/* Humedad */}
+              {/* Humidity */}
               <div className="relative bg-gradient-to-br from-blue-800/70 to-cyan-800/70 p-6 rounded-2xl shadow-2xl backdrop-blur-sm border border-blue-700/50">
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-4">
@@ -480,12 +479,12 @@ const App = () => {
 
             </div>
 
-            {/* Resumen AQI */}
+            {/* AQI Summary */}
             <div className="mt-8">
               <div className="max-w-4xl mx-auto relative bg-gray-800/70 p-6 rounded-2xl shadow-2xl backdrop-blur-sm border border-gray-700">
                 <div className="text-center">
                   <h3 className="text-lg font-medium text-gray-300 uppercase tracking-widest mb-4">
-                    📈 Air Quality Index (AQI)
+                    Air Quality Index (AQI)
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
@@ -520,24 +519,18 @@ const App = () => {
               Predictions with AI.
             </h2>
             <p className="mt-2 text-gray-400">
-              Our system uses LSTM neural networks to predict air quality
-              based on historical and real-time data from {cities.length} global cities.
-              Select any city to see updated data on temperature, humidity, and PM2.5.
+              Our mission is to inform society about air quality and the importance of being prepared for the future. It is estimated that nearly 7 million people die each year due to environmental pollution.
+              Having more information and knowledge about pollutants such as PM2.5 allows us to make better decisions to take care of our health, our environment, and our planet.
+              In addition, PM2.5 pollution seriously affects the earth, causing certain regions to have complications when it comes to farming.
             </p>
           </div>
           <div className="flex flex-col space-y-3 mt-6 md:mt-0">
             <button 
               className="px-8 py-3 bg-cyan-500 text-gray-900 font-bold rounded-xl shadow-lg hover:bg-cyan-400 transition transform hover:-translate-y-0.5 duration-300"
-              onClick={() => window.open('http://localhost:5000/api/cities', '_blank')}
+              onClick={() => window.open('https://www.iqair.com/', '_blank')}
             >
               View Data API
-            </button>
-            <button 
-              className="px-8 py-3 bg-purple-500 text-white font-bold rounded-xl shadow-lg hover:bg-purple-400 transition transform hover:-translate-y-0.5 duration-300"
-              onClick={() => checkBackendStatus()}
-            >
-              🔄 Update Data
-            </button>
+            </button> 
           </div>
         </div>
       </div>

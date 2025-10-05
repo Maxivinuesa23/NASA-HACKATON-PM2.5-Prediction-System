@@ -1,9 +1,3 @@
-# ========================================
-# API FLASK PARA PREDICTOR DE CALIDAD DEL AIRE
-# Backend REST API que mantiene toda la funcionalidad original
-# Compatible con frontend React
-# ========================================
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import torch
@@ -12,11 +6,11 @@ from datetime import datetime, timedelta
 import os
 import sys
 
-# CONFIGURAR RUTA DE IMPORTACIONES
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 
-# IMPORTAR FUNCIONALIDAD ORIGINAL (SIN MODIFICAR)
+
 from AirVisualSimulator import (
     generate_airvisual_data, 
     AirQualityDataset, 
@@ -39,101 +33,90 @@ from ModeloLSTM import (
     DEVICE
 )
 
-# CONFIGURACIÓN FLASK
-app = Flask(__name__)
-CORS(app)  # Permitir peticiones desde React
 
-# CONFIGURACIÓN GLOBAL
+app = Flask(__name__)
+CORS(app)  
+
 MODEL_PATH = 'air_quality_predictor_model.pth'
-model = None  # Variable global para el modelo
-cached_data = {}  # Cache para datos de ciudades
+model = None  
+cached_data = {}  
 
 def initialize_model():
     """
-    FUNCIÓN: Inicializa y carga el modelo LSTM
-    PROPÓSITO: Preparar modelo para hacer predicciones
+    FUNCTION: Initializes and loads the LSTM model
+
+    PURPOSE: Prepare model for making predictions
     """
     global model
-    print("🧠 Inicializando modelo LSTM...")
+    print("Initializing LSTM model...")
     
     try:
         model = AirQualityPredictor(N_FEATURES, HIDDEN_DIM, NUM_LAYERS, OUTPUT_DIM, DROPOUT_RATE)
         
-        # Intentar cargar modelo pre-entrenado
         if os.path.exists(MODEL_PATH):
             model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
-            print("✅ Modelo cargado exitosamente")
+            print("Model loaded successfully")
         else:
-            print("⚠️ Modelo no encontrado, será entrenado cuando sea necesario")
-            
+            print("Model not found, it will be trained when needed")
+
         return True
     except Exception as e:
-        print(f"❌ Error inicializando modelo: {e}")
+        print(f"Error initializing model: {e}")
         return False
 
 def ensure_model_trained(city_data):
     """
-    FUNCIÓN: Asegura que el modelo esté entrenado con datos de la ciudad
-    PROPÓSITO: Entrenar modelo si no existe o si es necesario
+    FUNCTION: Ensures the model is trained with city data
+    PURPOSE: Train model if it does not exist or if necessary
     """
     global model
     
     if not os.path.exists(MODEL_PATH):
-        print("🔄 Entrenando modelo con datos actuales...")
+        print(" Training model with current data...")
         
         try:
-            # Crear dataset con los datos
             from torch.utils.data import DataLoader, random_split
             
             full_dataset = AirQualityDataset(city_data, SEQ_LENGTH)
             
-            # Dividir datos
             train_size = int(0.8 * len(full_dataset))
             val_size = len(full_dataset) - train_size
             train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
             
-            # Crear DataLoaders
             train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
             val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
             
-            # Entrenar modelo
             train_model(model, train_loader, val_loader)
             
-            # Guardar modelo
             torch.save(model.state_dict(), MODEL_PATH)
-            print("💾 Modelo entrenado y guardado")
+            print(" Model trained and saved")
             
         except Exception as e:
-            print(f"❌ Error entrenando modelo: {e}")
+            print(f" Error training model: {e}")
             return False
     
     return True
 
 def predict_next_day_pm25(city_info):
     """
-    FUNCIÓN: Predice PM2.5 para el día siguiente
-    PROPÓSITO: Usar modelo LSTM para generar predicción
+    FUNCTION: Predicts PM2.5 for the next day
+    PURPOSE: Use LSTM model to generate prediction
     """
     try:
-        # Obtener datos de la ciudad
         city_data = generate_airvisual_data(city_info)
         
         if city_data is None or len(city_data) < SEQ_LENGTH + 10:
             return None
             
-        # Asegurar que el modelo esté entrenado
         if not ensure_model_trained(city_data):
             return None
             
-        # Crear dataset y obtener última secuencia
         full_dataset = AirQualityDataset(city_data, SEQ_LENGTH)
         last_sequence_data, _ = full_dataset[len(full_dataset)-1]
         prediction_sequence = last_sequence_data.cpu().numpy()
         
-        # Hacer predicción
         predicted_pm25 = make_single_prediction(model, prediction_sequence)
         
-        # Obtener valor actual para comparación
         if SCALER is not None:
             last_pm25_scaled = full_dataset.data[-1][0].item()
             mean_pm25 = SCALER.mean_[0]
@@ -146,26 +129,25 @@ def predict_next_day_pm25(city_info):
             'current_pm25': round(current_pm25, 1),
             'predicted_pm25': round(predicted_pm25, 1),
             'prediction_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d'),
-            'confidence': 0.85  # Placeholder para confianza
+            'confidence': 0.85  # Placeholder for confidence
         }
         
     except Exception as e:
-        print(f"❌ Error en predicción: {e}")
+        print(f"Error in prediction: {e}")
         return None
 
-# ========================================
+
 # ENDPOINTS DE LA API
-# ========================================
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """
-    ENDPOINT: Estado del servidor
-    RETORNA: JSON con estado de salud del sistema
+    ENDPOINT: Server status
+    RETURNS: JSON with system health status
     """
     return jsonify({
         'status': 'healthy',
-        'message': 'Predictor de Calidad del Aire API funcionando',
+        'message': 'API Air Quality Predictor working',
         'timestamp': datetime.now().isoformat(),
         'model_loaded': model is not None,
         'device': str(DEVICE)
@@ -174,8 +156,8 @@ def health_check():
 @app.route('/api/cities', methods=['GET'])
 def get_cities():
     """
-    ENDPOINT: Lista de ciudades disponibles
-    RETORNA: JSON con todas las ciudades que se pueden consultar
+    ENDPOINT: List of available cities
+    RETURNS: JSON with all cities that can be queried
     """
     cities_list = []
     for key, city in CITIES.items():
@@ -196,9 +178,9 @@ def get_cities():
 @app.route('/api/cities/<city_name>', methods=['GET'])
 def get_city_data(city_name):
     """
-    ENDPOINT: Datos actuales de una ciudad específica
-    PARÁMETRO: city_name (nombre de la ciudad)
-    RETORNA: JSON con datos actuales y predicción
+    ENDPOINT: Current data for a specific city
+    PARAMETER: city_name (name of the city)
+    RETURNS: JSON with current data and prediction
     """
     try:
         # Buscar ciudad en el diccionario
@@ -235,10 +217,10 @@ def get_city_data(city_name):
         
         # Simular datos meteorológicos adicionales
         weather_data = {
-            'temperature': round(np.random.normal(22, 8), 1),  # Temperatura simulada
-            'humidity': round(np.random.normal(60, 20), 1),    # Humedad simulada
-            'wind_speed': round(np.random.normal(15, 5), 1),   # Viento simulado
-            'pressure': round(np.random.normal(1013, 20), 1)   # Presión simulada
+            'temperature': round(np.random.normal(22, 8), 1),  
+            'humidity': round(np.random.normal(60, 20), 1),    
+            'wind_speed': round(np.random.normal(15, 5), 1),   
+            'pressure': round(np.random.normal(1013, 20), 1)   
         }
         
         # Convertir PM2.5 a AQI para clasificación
@@ -246,7 +228,6 @@ def get_city_data(city_name):
         aqi_approx = min(500, max(0, pm25_value * 2))  # Aproximación simple
         quality_level, quality_emoji = get_aqi_quality_level(aqi_approx)
         
-        # Obtener predicción
         prediction = predict_next_day_pm25(selected_city)
         
         response_data = {
@@ -288,9 +269,9 @@ def get_city_data(city_name):
 @app.route('/api/predict', methods=['POST'])
 def predict_city():
     """
-    ENDPOINT: Predicción específica para una ciudad
-    MÉTODO: POST con JSON body {'city': 'nombre_ciudad'}
-    RETORNA: JSON con predicción detallada
+    ENDPOINT: Specific prediction for a city
+    METHOD: POST with JSON body {'city': 'city_name'}
+    RETURNS: JSON with detailed prediction
     """
     try:
         data = request.get_json()
@@ -298,7 +279,7 @@ def predict_city():
         if not data or 'city' not in data:
             return jsonify({
                 'success': False,
-                'message': 'Falta especificar la ciudad en el JSON'
+                'message': 'The city is missing from the JSON.'
             }), 400
         
         city_name = data['city']
@@ -313,7 +294,7 @@ def predict_city():
         if not selected_city:
             return jsonify({
                 'success': False,
-                'message': f'Ciudad "{city_name}" no encontrada'
+                'message': f'City "{city_name}" not found.'
             }), 404
         
         # Obtener predicción
@@ -322,7 +303,7 @@ def predict_city():
         if not prediction:
             return jsonify({
                 'success': False,
-                'message': 'No se pudo generar predicción'
+                'message': 'Failed to generate prediction.'
             }), 500
         
         return jsonify({
@@ -335,15 +316,15 @@ def predict_city():
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'Error en predicción: {str(e)}'
+            'message': f'Error in prediction: {str(e)}'
         }), 500
 
 @app.route('/api/train', methods=['POST'])
 def train_model_endpoint():
     """
-    ENDPOINT: Forzar re-entrenamiento del modelo
-    MÉTODO: POST con JSON body {'city': 'nombre_ciudad'}
-    RETORNA: JSON con resultado del entrenamiento
+    ENDPOINT: Force re-training of the model
+    METHOD: POST with JSON body {'city': 'city_name'}
+    RETURNS: JSON with training result
     """
     try:
         data = request.get_json()
@@ -366,14 +347,14 @@ def train_model_endpoint():
         if city_data is None:
             return jsonify({
                 'success': False,
-                'message': 'No se pudieron obtener datos para entrenamiento'
+                'message': 'No training data could be obtained'
             }), 500
         
         success = ensure_model_trained(city_data)
         
         return jsonify({
             'success': success,
-            'message': 'Modelo re-entrenado exitosamente' if success else 'Error en entrenamiento',
+            'message': 'Model re-trained successfully' if success else 'Error in training',
             'city': selected_city['name'],
             'timestamp': datetime.now().isoformat()
         })
@@ -381,15 +362,15 @@ def train_model_endpoint():
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'Error en entrenamiento: {str(e)}'
+            'message': f'Training Error: {str(e)}'
         }), 500
 
 @app.route('/api/generate-data/<city_name>', methods=['GET'])
 def generate_city_data(city_name):
     """
-    ENDPOINT: Generar nueva serie temporal para una ciudad
-    PARÁMETRO: city_name (nombre de la ciudad)
-    RETORNA: JSON con serie temporal generada
+    ENDPOINT: Generate new time series for a city
+    PARAMETER: city_name (name of the city)
+    RETURNS: JSON with generated time series
     """
     try:
         # Buscar ciudad
@@ -402,7 +383,7 @@ def generate_city_data(city_name):
         if not selected_city:
             return jsonify({
                 'success': False,
-                'message': f'Ciudad "{city_name}" no encontrada'
+                'message': f'City "{city_name}" not found.'
             }), 404
         
         # Generar datos
@@ -411,7 +392,7 @@ def generate_city_data(city_name):
         if city_data is None:
             return jsonify({
                 'success': False,
-                'message': 'No se pudieron generar datos'
+                'message': 'Failed to generate data'
             }), 500
         
         # Convertir DataFrame a formato JSON-friendly
@@ -432,7 +413,7 @@ def generate_city_data(city_name):
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'Error generando datos: {str(e)}'
+            'message': f'Error to generate data: {str(e)}'
         }), 500
 
 # ========================================
@@ -440,25 +421,22 @@ def generate_city_data(city_name):
 # ========================================
 
 if __name__ == '__main__':
-    print("🚀 Iniciando API de Predicción de Calidad del Aire...")
+    print("Initializing API")
     
     # Inicializar modelo
     if initialize_model():
-        print("✅ Modelo inicializado correctamente")
+        print("API OK")
     else:
-        print("⚠️ Modelo no inicializado, se entrenará cuando sea necesario")
+        print("API Initialization Failed")
     
-    print("\n📍 ENDPOINTS DISPONIBLES:")
-    print("GET  /api/health - Estado del servidor")
-    print("GET  /api/cities - Lista de ciudades disponibles")
-    print("GET  /api/cities/{city} - Datos actuales de una ciudad")
-    print("POST /api/predict - Hacer predicción")
-    print("POST /api/train - Entrenar modelo")
-    print("GET  /api/generate-data/{city} - Generar serie temporal")
-    
-    print("\n🌐 Servidor ejecutándose en: http://localhost:5000")
-    print("📱 Listo para conectar con React Frontend")
-    
+    print("\n AVAILABLE ENDPOINTS:")
+    print("GET  /api/health - Server status")
+    print("GET  /api/cities - List of available cities")
+    print("GET  /api/cities/{city} - Current data for a city")
+    print("POST /api/predict - Make a prediction")
+    print("POST /api/train - Train the model")
+    print("GET  /api/generate-data/{city} - Generate time series")
+
     # Ejecutar servidor Flask
     app.run(
         host='0.0.0.0',    # Permitir conexiones externas
