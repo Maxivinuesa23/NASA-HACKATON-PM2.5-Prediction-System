@@ -1,7 +1,9 @@
 # Configuración de API Keys
 # API de AirVisual (IQAir)
+import os
 
 # API Key de AirVisual
 # Obtén tu API key en: https://www.iqair.com/air-quality-monitors/api
-AIRVISUAL_API_KEY = "183ab150-8440-4da1-a352-7758010a4d76"
+# Configura la variable de entorno AIRVISUAL_API_KEY
+AIRVISUAL_API_KEY = os.getenv("AIRVISUAL_API_KEY")
 AIRVISUAL_BASE_URL = "http://api.airvisual.com/v2/"
